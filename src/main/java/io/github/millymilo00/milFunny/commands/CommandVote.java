@@ -10,8 +10,17 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 
+// this is the worst code i've ever created
+/*
+* check if player can vote
+* Check if command is work
+* Check if candidate is real
+* check if vote is same vote they did before
+*
+* */
 public class CommandVote implements CommandExecutor {
 
     final MilFunny plugin;
@@ -27,16 +36,16 @@ public class CommandVote implements CommandExecutor {
         }
 
         Player player = (Player) sender;
-        int vote = 0;
-        String votes = null;
+        boolean voteYes = true;
+        String[] votes = null;
         if (player.getStatistic(Statistic.CHEST_OPENED) < 10 || player.getStatistic(Statistic.MOB_KILLS) < 30 || player.getStatistic(Statistic.PLAY_ONE_MINUTE) < 216000 && player.getStatistic(Statistic.CRAFT_ITEM) < 10) {
 //            player.sendMessage("You are not active enough to vote!");
 //            return true;
         }
 
         if (args.length < 1) { return false; }
-        if ("yes".equals(args[1])) { vote = 1; }
-        else if ("no".equals(args[1])) { vote = -1; }
+        if ("yes".equals(args[1])) { voteYes = true; }
+        else if ("no".equals(args[1])) { voteYes = false; }
         else { return false; }
 
         try {
@@ -49,25 +58,53 @@ public class CommandVote implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "You cannot vote for that player.");
             return true;
         }
-        if (votes.contains(player.getName())) {
-            sender.sendMessage(ChatColor.RED + "You've already voted yes for this person!");
-            return true;
+        HashSet<String> votesYes = new HashSet<>();
+        HashSet<String> votesNo = new HashSet<>();
+        votesYes.addAll(Arrays.asList(votes[0].split(",")));
+        votesNo.addAll(Arrays.asList(votes[1].split(",")));
+
+        if (voteYes) {
+            if (votesYes.contains(player.getName())) {
+                player.sendMessage(ChatColor.RED + "You've already votes yes for that candidated!");
+                return true;
+            }
+            if (votesNo.contains(player.getName())) {
+                votesNo.remove(player.getName());
+            }
+            votesYes.add(player.getName());
+        }
+        else {
+            if (votesNo.contains(player.getName())) {
+                player.sendMessage(ChatColor.RED + "You've already votes no for that candidated!");
+                return true;
+            }
+            if (votesYes.contains(player.getName())) {
+                votesYes.remove(player.getName());
+            }
+            votesNo.add(player.getName());
         }
 
-        String[] votesNames = votes.split(",");
         sender.sendMessage(ChatColor.YELLOW + "Vote added");
         Player candidate = plugin.getServer().getPlayer(args[0]);
         // Update player op status
-        if (votesNames.length == 6 && vote == 1) {
+        if (votesYes.size() - votesNo.size() == 6 && voteYes) {
             candidate.sendMessage(ChatColor.AQUA + "You have been voted back into Op");
             candidate.setOp(true);
-        } else if (votesNames.length == 6 && vote == -1) {
+        } else if (votesYes.size() - votesNo.size() == 6 && !voteYes) {
             candidate.sendMessage(ChatColor.DARK_RED + "You have been voted out of Op");
             candidate.setOp(false);
         }
 
+        String newVotesYes = "";
+        String newVotesNo = "";
+        for (String yes : votesYes) {
+            newVotesYes += yes + ",";
+        }
+        for (String no : votesNo) {
+            newVotesNo += no + ",";
+        }
         try {
-            plugin.database.setPlayerVotes(args[0], votes+","+player.getName());
+            plugin.database.setPlayerVotes(candidate.getName(), newVotesYes, newVotesNo);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
