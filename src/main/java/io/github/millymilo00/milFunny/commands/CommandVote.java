@@ -14,13 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 // this is the worst code i've ever created
-/*
-* check if player can vote
-* Check if command is work
-* Check if candidate is real
-* check if vote is same vote they did before
-*
-* */
 public class CommandVote implements CommandExecutor {
 
     final MilFunny plugin;
@@ -65,7 +58,7 @@ public class CommandVote implements CommandExecutor {
 
         if (voteYes) {
             if (votesYes.contains(player.getName())) {
-                player.sendMessage(ChatColor.RED + "You've already votes yes for that candidated!");
+                player.sendMessage(ChatColor.RED + "You've already voted yes for that candidate!");
                 return true;
             }
             if (votesNo.contains(player.getName())) {
@@ -75,7 +68,7 @@ public class CommandVote implements CommandExecutor {
         }
         else {
             if (votesNo.contains(player.getName())) {
-                player.sendMessage(ChatColor.RED + "You've already votes no for that candidated!");
+                player.sendMessage(ChatColor.RED + "You've already voted no for that candidate!");
                 return true;
             }
             if (votesYes.contains(player.getName())) {
