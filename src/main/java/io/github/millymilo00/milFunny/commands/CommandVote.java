@@ -36,7 +36,7 @@ public class CommandVote implements CommandExecutor {
 //            return true;
         }
 
-        if (args.length < 1) { return false; }
+        if (args.length < 2) { return false; }
         if ("yes".equals(args[1])) { voteYes = true; }
         else if ("no".equals(args[1])) { voteYes = false; }
         else { return false; }
@@ -51,6 +51,7 @@ public class CommandVote implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "You cannot vote for that player.");
             return true;
         }
+
         HashSet<String> votesYes = new HashSet<>();
         HashSet<String> votesNo = new HashSet<>();
         votesYes.addAll(Arrays.asList(votes[0].split(",")));
@@ -79,6 +80,8 @@ public class CommandVote implements CommandExecutor {
 
         sender.sendMessage(ChatColor.YELLOW + "Vote added");
         Player candidate = plugin.getServer().getPlayer(args[0]);
+        System.out.println(votesYes.size());
+        System.out.println(votesNo.size());
         // Update player op status
         if (votesYes.size() - votesNo.size() == 6 && voteYes) {
             candidate.sendMessage(ChatColor.AQUA + "You have been voted back into Op");
@@ -97,7 +100,7 @@ public class CommandVote implements CommandExecutor {
             newVotesNo += no + ",";
         }
         try {
-            plugin.database.setPlayerVotes(candidate.getName(), newVotesYes, newVotesNo);
+            plugin.database.setPlayerVotes(args[0], newVotesYes, newVotesNo);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

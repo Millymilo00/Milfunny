@@ -48,7 +48,7 @@ public class MilFunnyDatabase {
     }
 
     public void setPlayerVotes(String candidate, String newVoteYes, String newVoteNo) throws SQLException{
-        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE candidates SET voteYes = ?, voteNo =  WHERE username = ?")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE candidates SET voteYes = ?, voteNo = ? WHERE username = ?")) {
             preparedStatement.setString(1, newVoteYes);
             preparedStatement.setString(2, newVoteNo);
             preparedStatement.setString(3, candidate);
