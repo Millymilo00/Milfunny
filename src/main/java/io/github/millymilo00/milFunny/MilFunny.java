@@ -3,6 +3,7 @@ package io.github.millymilo00.milFunny;
 import io.github.millymilo00.milFunny.commands.*;
 import io.github.millymilo00.milFunny.listeners.ListenerCBSend;
 import io.github.millymilo00.milFunny.listeners.ListenerCommand;
+import io.github.millymilo00.milFunny.listeners.ListenerPlayerJoin;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +25,7 @@ public final class MilFunny extends JavaPlugin {
         // TODO: in these following events, check if "execute" commands contain the banned commands
         getServer().getPluginManager().registerEvents(new ListenerCommand(this), this);
         getServer().getPluginManager().registerEvents(new ListenerCBSend(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerPlayerJoin(this), this);
         this.getCommand("opme").setExecutor(new CommandOpme(this));
         this.getCommand("vote").setExecutor(new CommandVote(this));
         // TODO: These commands should just be made into some kind of "/milfunny [add|remove] [opme|candidate]" type command
@@ -62,10 +64,7 @@ public final class MilFunny extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
         try {
-            Array candidates = database.getCandidates();
-            if (candidates != null) {
-                tempOps.addAll((Collection<? extends String>) candidates);
-            }
+            tempOps.addAll(database.getCandidates());
         }
         catch (SQLException e) {
             this.getLogger().warning("Unable to manage candidate commands, ermm this may have bad consequences probably");

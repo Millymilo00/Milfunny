@@ -79,7 +79,7 @@ public class CommandVote implements CommandExecutor {
         sender.sendMessage(ChatColor.YELLOW + "Vote added");
         try {
             plugin.database.setPlayerVotes(args[0], String.join(",", votesYes), String.join(",", votesNo));
-            plugin.database.applyVotes();
+            plugin.database.countVotes();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -11,6 +11,8 @@ public class MilFunnyDatabase {
 
     private final Connection connection;
     private final MilFunny plugin;
+    private String topVote = null;
+    private HashSet<String> ops = new HashSet<>();
 
     public MilFunnyDatabase(MilFunny plugin, String path) throws SQLException {
         this.plugin = plugin;
@@ -79,32 +81,14 @@ public class MilFunnyDatabase {
         }
     }
 
-    public Array getCandidates() throws SQLException {
+    public HashSet<String> getCandidates() throws SQLException {
         try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT username FROM candidates")) {
             ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getArray("username");
-            } else {
-                return null;
-            }
-        }
-    }
-
-    public String getHighestVote() throws SQLException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM candidates")) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            String winner = null;
-            int prevMax = 5;
+            HashSet<String> candidates = new HashSet<>();
             while (resultSet.next()) {
-                String voteYes = resultSet.getString("voteYes");
-                String voteNo = resultSet.getString("voteNo");
-                int votes = (voteYes.length() - voteYes.replace(",", "").length()) - (voteNo.length() - voteNo.replace(",", "").length());
-                if (votes > prevMax) {
-                    winner = resultSet.getString("username");
-                    prevMax = votes;
-                }
+                candidates.add(resultSet.getString("username"));
             }
-            return winner;
+            return candidates;
         }
     }
 
@@ -116,35 +100,46 @@ public class MilFunnyDatabase {
         }
     }
 
-    public HashSet<String> getOps() throws SQLException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT username FROM candidates WHERE isOp = true")) {
+    public void countVotes() throws SQLException {
+        // Get the topVote and current ops
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM candidates")) {
             ResultSet resultSet = preparedStatement.executeQuery();
-            HashSet<String> opped = new HashSet<>();
+            int prevMax = 5;
             while (resultSet.next()) {
-                opped.add(resultSet.getString("username"));
+                String voteYes = resultSet.getString("voteYes");
+                String voteNo = resultSet.getString("voteNo");
+                int votes = (voteYes.length() - voteYes.replace(",", "").length()) - (voteNo.length() - voteNo.replace(",", "").length());
+                if (votes > prevMax) {
+                    topVote = resultSet.getString("username");
+                    prevMax = votes;
+                }
+                if (resultSet.getBoolean("isOp")) {
+                    ops.add(resultSet.getString("username"));
+                }
             }
-            return opped;
         }
+        applyVotes();
     }
 
     public void applyVotes() throws SQLException {
-        String shouldBeOp = getHighestVote();
-        for (String oppedCandidate : getOps()) {
+        // Set all outdates ops to not be ops
+        for (String oppedCandidate : ops) {
             Player oppedPlayer = plugin.getServer().getPlayer(oppedCandidate);
-            if (!oppedCandidate.equals(shouldBeOp)) {
+            if (!oppedCandidate.equals(topVote)) {
                 setCurOp(oppedCandidate, false);
-                if (oppedPlayer.isOp()) {
+                if (oppedPlayer != null && oppedPlayer.isOp()) {
                     oppedPlayer.setOp(false);
                     oppedPlayer.sendMessage(ChatColor.RED + "You have been voted out of op!");
                 }
             }
         }
-        if (shouldBeOp == null) {
+        if (topVote == null) {
             return;
         }
-        Player shouldBeOpPlr = plugin.getServer().getPlayer(shouldBeOp);
-        if (!shouldBeOpPlr.isOp()) {
-            setCurOp(shouldBeOp, true);
+        // Op the guy who should be op, if they aren't already
+        Player shouldBeOpPlr = plugin.getServer().getPlayer(topVote);
+        if (shouldBeOpPlr != null && !shouldBeOpPlr.isOp()) {
+            setCurOp(topVote, true);
             shouldBeOpPlr.setOp(true);
             shouldBeOpPlr.sendMessage(ChatColor.AQUA + "You have been voted into op!");
         }
