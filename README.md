@@ -3,5 +3,5 @@
 
 ## Features
 * Give a person permission to give themselves op for one hour
-* Let people vote on whether someone should hav op or not
+* Let people vote on whether someone should have op or not
 * Restrict commands for the two above

@@ -22,6 +22,7 @@ public class ListenerCommand implements Listener {
 
         String inCommand = event.getMessage().split(" ")[0];
         inCommand = inCommand.substring(inCommand.lastIndexOf('/')+1);
+        // Block command
         if (plugin.getConfig().getList("bannedcommands").contains(inCommand)) {
             event.getPlayer().sendMessage(ChatColor.DARK_RED + "no way twin");
             event.setCancelled(true);
