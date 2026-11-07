@@ -1,12 +1,19 @@
 package io.github.millymilo00.milFunny;
 
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
 import java.sql.*;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class MilFunnyDatabase {
 
     private final Connection connection;
+    private final MilFunny plugin;
 
-    public MilFunnyDatabase(String path) throws SQLException {
+    public MilFunnyDatabase(MilFunny plugin, String path) throws SQLException {
+        this.plugin = plugin;
         connection = DriverManager.getConnection("jdbc:sqlite:" + path);
         try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS opMePlrs (" +
@@ -14,7 +21,8 @@ public class MilFunnyDatabase {
             statement.execute("CREATE TABLE IF NOT EXISTS candidates (" +
                     "username TEXT PRIMARY KEY, " +
                     "voteYes TEXT NOT NULL DEFAULT \"\", " +
-                    "voteNo TEXT NOT NULL DEFAULT \"\")");
+                    "voteNo TEXT NOT NULL DEFAULT \"\", " +
+                    "isOp INT NOT NULL DEFAULT false)");
         }
     }
 
@@ -79,6 +87,66 @@ public class MilFunnyDatabase {
             } else {
                 return null;
             }
+        }
+    }
+
+    public String getHighestVote() throws SQLException {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM candidates")) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            String winner = null;
+            int prevMax = 5;
+            while (resultSet.next()) {
+                String voteYes = resultSet.getString("voteYes");
+                String voteNo = resultSet.getString("voteNo");
+                int votes = (voteYes.length() - voteYes.replace(",", "").length()) - (voteNo.length() - voteNo.replace(",", "").length());
+                if (votes > prevMax) {
+                    winner = resultSet.getString("username");
+                    prevMax = votes;
+                }
+            }
+            return winner;
+        }
+    }
+
+    public void setCurOp(String player, boolean status) throws SQLException {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE candidates SET isOp = ? WHERE username = ?")) {
+            preparedStatement.setBoolean(1, status);
+            preparedStatement.setString(2, player);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    public HashSet<String> getOps() throws SQLException {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT username FROM candidates WHERE isOp = true")) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            HashSet<String> opped = new HashSet<>();
+            while (resultSet.next()) {
+                opped.add(resultSet.getString("username"));
+            }
+            return opped;
+        }
+    }
+
+    public void applyVotes() throws SQLException {
+        String shouldBeOp = getHighestVote();
+        for (String oppedCandidate : getOps()) {
+            Player oppedPlayer = plugin.getServer().getPlayer(oppedCandidate);
+            if (!oppedCandidate.equals(shouldBeOp)) {
+                setCurOp(oppedCandidate, false);
+                if (oppedPlayer.isOp()) {
+                    oppedPlayer.setOp(false);
+                    oppedPlayer.sendMessage(ChatColor.RED + "You have been voted out of op!");
+                }
+            }
+        }
+        if (shouldBeOp == null) {
+            return;
+        }
+        Player shouldBeOpPlr = plugin.getServer().getPlayer(shouldBeOp);
+        if (!shouldBeOpPlr.isOp()) {
+            setCurOp(shouldBeOp, true);
+            shouldBeOpPlr.setOp(true);
+            shouldBeOpPlr.sendMessage(ChatColor.AQUA + "You have been voted into op!");
         }
     }
 }

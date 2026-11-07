@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 
 // this is the worst code i've ever created
 public class CommandVote implements CommandExecutor {
@@ -77,33 +76,14 @@ public class CommandVote implements CommandExecutor {
             }
             votesNo.add(player.getName());
         }
-
         sender.sendMessage(ChatColor.YELLOW + "Vote added");
-        Player candidate = plugin.getServer().getPlayer(args[0]);
-        System.out.println(votesYes.size());
-        System.out.println(votesNo.size());
-        // Update player op status
-        if (votesYes.size() - votesNo.size() == 6 && voteYes) {
-            candidate.sendMessage(ChatColor.AQUA + "You have been voted back into Op");
-            candidate.setOp(true);
-        } else if (votesYes.size() - votesNo.size() == 6 && !voteYes) {
-            candidate.sendMessage(ChatColor.DARK_RED + "You have been voted out of Op");
-            candidate.setOp(false);
-        }
-
-        String newVotesYes = "";
-        String newVotesNo = "";
-        for (String yes : votesYes) {
-            newVotesYes += yes + ",";
-        }
-        for (String no : votesNo) {
-            newVotesNo += no + ",";
-        }
         try {
-            plugin.database.setPlayerVotes(args[0], newVotesYes, newVotesNo);
+            plugin.database.setPlayerVotes(args[0], String.join(",", votesYes), String.join(",", votesNo));
+            plugin.database.applyVotes();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
         return true;
     }
 }

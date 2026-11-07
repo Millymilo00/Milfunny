@@ -55,7 +55,7 @@ public final class MilFunny extends JavaPlugin {
                 getDataFolder().mkdirs();
             }
 
-            database = new MilFunnyDatabase(getDataFolder().getAbsolutePath() + "/data.db");
+            database = new MilFunnyDatabase(this, getDataFolder().getAbsolutePath() + "/data.db");
         } catch (SQLException e) {
             e.printStackTrace();
             this.getLogger().severe("Failed to connect to database! " + e.getMessage());
