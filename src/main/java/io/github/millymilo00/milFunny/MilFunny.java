@@ -3,12 +3,12 @@ package io.github.millymilo00.milFunny;
 import io.github.millymilo00.milFunny.commands.*;
 import io.github.millymilo00.milFunny.listeners.ListenerCBSend;
 import io.github.millymilo00.milFunny.listeners.ListenerCommand;
+import io.github.millymilo00.milFunny.listeners.ListenerCreativeItem;
 import io.github.millymilo00.milFunny.listeners.ListenerPlayerJoin;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.sql.Array;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -26,13 +26,10 @@ public final class MilFunny extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenerCommand(this), this);
         getServer().getPluginManager().registerEvents(new ListenerCBSend(this), this);
         getServer().getPluginManager().registerEvents(new ListenerPlayerJoin(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerCreativeItem(this), this);
         this.getCommand("opme").setExecutor(new CommandOpme(this));
         this.getCommand("vote").setExecutor(new CommandVote(this));
-        // TODO: These commands should just be made into some kind of "/milfunny [add|remove] [opme|candidate]" type command
-        this.getCommand("addopme").setExecutor(new CommandAddOpme(this));
-        this.getCommand("addcandidate").setExecutor(new CommandAddCandidate(this));
-        this.getCommand("removeopme").setExecutor(new CommandRemoveOpme(this));
-        this.getCommand("removecandidate").setExecutor(new CommandRemoveCandidate(this));
+        this.getCommand("milfunny").setExecutor(new CommandAdmin(this));
     }
 
     @Override
@@ -45,7 +42,7 @@ public final class MilFunny extends JavaPlugin {
     }
 
     private void setupConfig() {
-        config.addDefault("bannedcommands", Arrays.asList("op", "gamerule", "addopme", "removeopme", "removecandidate"));
+        config.addDefault("bannedcommands", Arrays.asList("op", "gamerule", "addopme", "removeopme", "removecandidate", "seed"));
         config.options().copyDefaults(true);
         saveConfig();
     }

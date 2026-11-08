@@ -8,30 +8,16 @@ commands:
   opme:
     description: op yourself for an hour (requires perms)
     usage: /opme
-  addopme:
-    description: add whitelist for opme
-    usage: /addopme username
-    permission: milfunny.manageOpme
-  removeopme:
-    description: remove whitelist for opme
-    usage: /removeopme username
-    permission: milfunny.manageOpme
-  addcandidate:
-    description: add candidate for voting
-    usage: /addcandidate username
-    permission: milfunny.manageVote
-  removecandidate:
-    description: remove candidate for voting
-    usage: /removecandidate username
-    permission: milfunny.manageVote
+  milfunny:
+    description: Admin command to manage this plugin
+    usage: /milfunny - shows help
+    aliases: [mf]
+    permission: milfunny.admin
   vote:
     description: lets people vote for op
     usage: /vote username [yes|no]
 
 permissions:
-  milfunny.manageOpme:
-    description: Allows or disallows someone to run the /addopme command
-    default: op
-  milfunny.manageVote:
-    description: Allows or disallows someone to be voted for
+  milfunny.admin:
+    description: Permission for the /milfunny /mf command
     default: op

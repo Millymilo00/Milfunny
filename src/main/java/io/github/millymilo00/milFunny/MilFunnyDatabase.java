@@ -130,6 +130,7 @@ public class MilFunnyDatabase {
                 if (oppedPlayer != null && oppedPlayer.isOp()) {
                     oppedPlayer.setOp(false);
                     oppedPlayer.sendMessage(ChatColor.RED + "You have been voted out of op!");
+                    plugin.tempOps.remove(oppedCandidate);
                 }
             }
         }
@@ -142,6 +143,7 @@ public class MilFunnyDatabase {
             setCurOp(topVote, true);
             shouldBeOpPlr.setOp(true);
             shouldBeOpPlr.sendMessage(ChatColor.AQUA + "You have been voted into op!");
+            plugin.tempOps.add(topVote);
         }
     }
 }
