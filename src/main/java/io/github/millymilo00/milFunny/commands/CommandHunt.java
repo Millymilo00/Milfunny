@@ -12,6 +12,13 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashSet;
 
 public class CommandHunt implements CommandExecutor {
+
+    private final HashSet<Player> markedPlayers;
+
+    public CommandHunt(HashSet<Player> markedPlayers) {
+        this.markedPlayers = markedPlayers;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -19,21 +26,12 @@ public class CommandHunt implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        HashSet<Player> holdingMarks = new HashSet<>();
         Location shortestDist = null;
-        for (Player wrldPlr : player.getWorld().getPlayers()) {
-            for (ItemStack item : wrldPlr.getInventory().getContents()) {
-                if (item.getItemMeta().getLore().contains("Admin Marked")) {
-                    holdingMarks.add(wrldPlr);
-                    shortestDist = wrldPlr.getLocation();
-                }
-            }
-        }
-        if (holdingMarks.isEmpty()) {
+        if (markedPlayers.isEmpty()) {
             sender.sendMessage(ChatColor.YELLOW + "No player is holding any marked items");
             return true;
         }
-        for (Player plr : holdingMarks) {
+        for (Player plr : markedPlayers) {
             if (player.getLocation().distance(plr.getLocation()) < player.getLocation().distance(shortestDist)) {
                 shortestDist = plr.getLocation();
             }

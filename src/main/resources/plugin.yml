@@ -16,6 +16,9 @@ commands:
   vote:
     description: lets people vote for op
     usage: /vote username [yes|no]
+  hunt:
+    description: gives a compass for hunting marked players
+    usage: /hunt
 
 permissions:
   milfunny.admin:

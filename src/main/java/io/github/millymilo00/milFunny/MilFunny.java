@@ -1,12 +1,10 @@
 package io.github.millymilo00.milFunny;
 
 import io.github.millymilo00.milFunny.commands.*;
-import io.github.millymilo00.milFunny.listeners.ListenerCBSend;
-import io.github.millymilo00.milFunny.listeners.ListenerCommand;
-import io.github.millymilo00.milFunny.listeners.ListenerCreativeItem;
-import io.github.millymilo00.milFunny.listeners.ListenerPlayerJoin;
+import io.github.millymilo00.milFunny.listeners.*;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -15,7 +13,8 @@ import java.util.*;
 public final class MilFunny extends JavaPlugin {
 
     FileConfiguration config = getConfig();
-    public HashSet<String> tempOps = new HashSet<String>();
+    public HashSet<String> tempOps = new HashSet<>();
+    public HashSet<Player> markedPlayers = new HashSet<>();
     public MilFunnyDatabase database;
 
     @Override
@@ -25,11 +24,15 @@ public final class MilFunny extends JavaPlugin {
         // TODO: in these following events, check if "execute" commands contain the banned commands
         getServer().getPluginManager().registerEvents(new ListenerCommand(this), this);
         getServer().getPluginManager().registerEvents(new ListenerCBSend(this), this);
+
         getServer().getPluginManager().registerEvents(new ListenerPlayerJoin(this), this);
         getServer().getPluginManager().registerEvents(new ListenerCreativeItem(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerHasMark(markedPlayers), this);
+        getServer().getPluginManager().registerEvents(new ListenerInteractCompass(), this);
         this.getCommand("opme").setExecutor(new CommandOpme(this));
         this.getCommand("vote").setExecutor(new CommandVote(this));
         this.getCommand("milfunny").setExecutor(new CommandAdmin(this));
+        this.getCommand("hunt").setExecutor(new CommandHunt(markedPlayers));
     }
 
     @Override
