@@ -28,7 +28,7 @@ public final class MilFunny extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenerPlayerJoin(this), this);
         getServer().getPluginManager().registerEvents(new ListenerCreativeItem(this), this);
         getServer().getPluginManager().registerEvents(new ListenerHasMark(markedPlayers), this);
-        getServer().getPluginManager().registerEvents(new ListenerInteractCompass(), this);
+        getServer().getPluginManager().registerEvents(new ListenerInteractCompass(markedPlayers), this);
         this.getCommand("opme").setExecutor(new CommandOpme(this));
         this.getCommand("vote").setExecutor(new CommandVote(this));
         this.getCommand("milfunny").setExecutor(new CommandAdmin(this));
